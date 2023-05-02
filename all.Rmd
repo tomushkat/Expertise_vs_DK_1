@@ -1,0 +1,227 @@
+---
+title: "all"
+author: "Tom Mushkat"
+date: "2022-09-11"
+output:
+   html_document:
+      code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, warning=FALSE,message=FALSE}
+pacman::p_load(tidyverse, doSPSS, here, ez, emmeans)
+
+Data <- read_csv(here("Data//dataForAnalysis.csv"))
+table(Data$Gender) / nrow(Data) * 100
+
+ExpertDK <- c(1, 0, 0, 0)
+ExpertKnow <- c(0, 1, 0, 0)
+LaypersonDK <- c(0, 0, 1, 0)
+LaypersonKnow <- c(0, 0, 0, 1)
+
+ExpertDK <- c(1, 0, 0, 0)
+ExpertKnow <- c(0, 1, 0, 0)
+LaypersonDK <- c(0, 0, 1, 0)
+LaypersonKnow <- c(0, 0, 0, 1)
+
+dvCom_1 <- if_else(is.na(Data$Voltaren), Data$Wait, Data$Voltaren)
+dvCom_2 <- if_else(is.na(Data$Physiotherapy), Data$Wait, Data$Physiotherapy)
+dvCom_3 <- if_else(is.na(Data$CT), Data$Wait, Data$CT)
+Data$Complaience <- rowMeans(cbind(Data$Physiotherapy, Data$CT))
+Data$dvCom_4 <- sdOutliers(if_else(is.na(Data$Complaience), Data$Wait, Data$Complaience))
+Data$dvCom_5 <- sdOutliers(if_else(is.na(Data$Voltaren), Data$Wait, Data$Voltaren))
+
+Data <- Data %>%
+  mutate(Condition = paste0(source_identity, source_answer
+))
+
+METI_Integrity <- Data %>% drop_na(METI_Benelovent)
+METI_Benelovent <- Data %>% drop_na(METI_Benelovent)
+comp <- Data %>%
+  drop_na(dvCom_4)
+fit1 = lm(METI_Expertise ~ Condition, data = Data)
+fit2 = lm(METI_Integrity ~ Condition, data = METI_Integrity)
+fit3 = lm(METI_Benelovent ~ Condition, data = METI_Benelovent)
+fit4 = lm(dvCom_4 ~ Condition, data = comp)
+```
+
+
+
+# Expertise
+## Descriptive_Statistics
+```{r, warning=FALSE,message=FALSE}
+modelTow <- twoWay(Data$METI_Expertise, Data$source_identity, Data$source_answer)
+modelTow$Descriptive_Statistics
+```
+
+## ANOVA
+```{r, warning=FALSE,message=FALSE}
+e <- ezANOVA(data = Data, dv = METI_Expertise, wid = Q1, between = .(source_identity, source_answer), type = 3, return_aov = TRUE)
+e$ANOVA
+```
+## Effect size partial Eta square
+```{r, warning=FALSE,message=FALSE}
+modelTow$Effect_zise
+modelTow$Effect_interpretation
+```
+
+## Contrast ExpertDK - LaypersonDK
+```{r, warning=FALSE,message=FALSE}
+
+cont1 <- emmeans(fit1, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertDK", "LaypersonDK")))
+cont1$contrasts
+```
+
+## Contrast ExpertKnow - LaypersonKnow
+
+```{r, warning=FALSE,message=FALSE}
+
+cont2 <- emmeans(fit1, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertKnow", "LaypersonKnow") ) )
+cont2$contrasts
+```
+
+```{r, warning=FALSE,message=FALSE}
+
+
+modelTow$Figure
+```
+
+# Integrity
+## Descriptive_Statistics
+```{r, warning=FALSE,message=FALSE}
+
+modelTow <- twoWay(METI_Integrity$METI_Integrity, METI_Integrity$Expert, METI_Integrity$Ignorance)
+modelTow$Descriptive_Statistics
+
+
+```
+
+## ANOVA
+```{r, warning=FALSE,message=FALSE}
+e <- ezANOVA(data = METI_Integrity, dv = METI_Integrity, wid = Q1, between = .(Expert, Ignorance), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
+e$ANOVA
+```
+## Effect size partial Eta square
+```{r, warning=FALSE,message=FALSE}
+modelTow$Effect_zise
+modelTow$Effect_interpretation
+```
+
+## Contrast ExpertDK - LaypersonDK
+```{r, warning=FALSE,message=FALSE}
+
+cont1 <- emmeans(fit2, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertDK", "LaypersonDK") ) )
+cont1$contrasts
+```
+
+## Contrast ExpertKnow - LaypersonKnow
+
+```{r, warning=FALSE,message=FALSE}
+
+cont2 <- emmeans(fit2, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertKnow", "LaypersonKnow") ) )
+cont2$contrasts
+```
+```{r, warning=FALSE,message=FALSE}
+
+
+modelTow$Figure
+```
+
+# Benelovent
+## Descriptive_Statistics
+```{r, warning=FALSE,message=FALSE}
+
+modelTow <- twoWay(METI_Benelovent$METI_Benelovent, METI_Benelovent$Expert, METI_Benelovent$Ignorance)
+modelTow$Descriptive_Statistics
+```
+
+## ANOVA
+```{r, warning=FALSE,message=FALSE}
+e <- ezANOVA(data = METI_Benelovent, dv = METI_Benelovent, wid = Q1, between = .(Expert, Ignorance), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
+e$ANOVA
+```
+## Effect size partial Eta square
+```{r, warning=FALSE,message=FALSE}
+modelTow$Effect_zise
+modelTow$Effect_interpretation
+```
+
+## Contrast ExpertDK - LaypersonDK
+```{r, warning=FALSE,message=FALSE}
+
+cont1 <- emmeans(fit3, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertDK", "LaypersonDK") ) )
+cont1$contrasts
+```
+
+## Contrast ExpertKnow - LaypersonKnow
+
+```{r, warning=FALSE,message=FALSE}
+
+cont2 <- emmeans(fit3, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertKnow", "LaypersonKnow") ) )
+cont2$contrasts
+```
+```{r, warning=FALSE,message=FALSE}
+
+
+modelTow$Figure
+```
+
+# Complaience
+## Descriptive_Statistics
+```{r, warning=FALSE,message=FALSE}
+
+comp %>% 
+  group_by(Expert) %>% 
+  summarise(M = round(mean(dvCom_4), 2),
+            SD = round(sd(dvCom_4), 2))
+
+comp %>% 
+  group_by(Ignorance) %>% 
+  summarise(M = round(mean(dvCom_4), 2),
+            SD = round(sd(dvCom_4), 2))
+
+modelTow <- twoWay(comp$dvCom_4, comp$Expert, comp$Ignorance)
+modelTow$Descriptive_Statistics
+```
+
+## ANOVA
+```{r, warning=FALSE,message=FALSE}
+e <- ezANOVA(data = comp, dv = dvCom_4, wid = Q1, between = .(Expert, Ignorance), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
+e$ANOVA
+```
+## Effect size partial Eta square
+```{r, warning=FALSE,message=FALSE}
+modelTow$Effect_zise
+modelTow$Effect_interpretation
+```
+
+## Contrast ExpertDK - LaypersonDK
+```{r, warning=FALSE,message=FALSE}
+
+cont1 <- emmeans(fit4, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertDK", "LaypersonDK") ) )
+cont1$contrasts
+```
+
+## Contrast ExpertKnow - LaypersonKnow
+
+```{r, warning=FALSE,message=FALSE}
+
+cont2 <- emmeans(fit4, specs = pairwise ~ Condition,
+         at = list(Condition = c("ExpertKnow", "LaypersonKnow") ) )
+cont2$contrasts
+```
+```{r, warning=FALSE,message=FALSE}
+
+
+modelTow$Figure
+```

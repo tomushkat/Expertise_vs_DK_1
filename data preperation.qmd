@@ -1,0 +1,102 @@
+---
+title: "Cleaning Data"
+author: "Tom Mushkat"
+format: html
+editor: visual
+---
+
+```{r}
+
+pacman::p_load(tidyverse, skimr, here, doSPSS)
+
+Data <- read_csv(here("Data//dataForCleaning.csv"))
+
+Data_1 <- Data %>% 
+  filter(Alone == "Alone") %>% 
+  filter(Disturbances == "No") %>% 
+  filter(Consecutively == "Yes") %>% 
+  filter(Honesty == "Yes, I put in a reasonable effort") %>% 
+  mutate(cleanDuration = sdOutliers(Duration)) %>% 
+  drop_na(cleanDuration)
+
+
+Data_2 <- Data_1 %>% 
+  mutate(METI_1 = if_else(METI_1 == "1\nIncompetent", 1,
+                          if_else(METI_1 == "7\nCompetent", 7, as.numeric(METI_1))),
+         METI_2 = if_else(METI_2 == "1\nUnintelligent", 1,
+                          if_else(METI_2 == "7\nIntelligent", 7, as.numeric(METI_2))),
+         METI_3 = if_else(METI_3 == "1\nPoorly educated", 1,
+                          if_else(METI_3 == "7\nWell educated", 7, as.numeric(METI_3))),
+         METI_4 = if_else(METI_4 ==  "1\nUnprofessional", 1,
+                          if_else(METI_4 == "7\nProfessional", 7, as.numeric(METI_4))),
+         METI_5 = if_else(METI_5 ==  "1\nInexperienced", 1,
+                          if_else(METI_5 == "7\nExperienced", 7, as.numeric(METI_5))),
+         METI_6 = if_else(METI_6 ==  "1\nUnqualified", 1,
+                          if_else(METI_6 == "7\nQualified", 7, as.numeric(METI_6))),
+         METI_7 = if_else(METI_7 ==  "1\nHindering", 1,
+                          if_else(METI_7 == "7\nHelpful", 7, as.numeric(METI_7))),
+         METI_8 = if_else(METI_8 ==  "1\nInsincere", 1,
+                          if_else(METI_8 == "7\nSincere", 7, as.numeric(METI_8))),
+         METI_9 = if_else(METI_9 ==  "1\nDishonest", 1,
+                          if_else(METI_9 == "7\nHonest", 7, as.numeric(METI_9))),
+         METI_10 = if_else(METI_10 ==  "1\nUnjust", 1,
+                          if_else(METI_10 == "7\nJust", 7, as.numeric(METI_10))),
+         METI_11 = if_else(METI_11 ==  "1\nSelfish", 1,
+                          if_else(METI_11 == "7\nUnselfish", 7, as.numeric(METI_11))),
+         METI_12 = if_else(METI_12 ==  "1\nUnfair", 1,
+                          if_else(METI_12 == "7\nFair", 7, as.numeric(METI_12))),
+         METI_13 = if_else(METI_13 ==  "1\nImmoral", 1,
+                          if_else(METI_13 == "7\nMoral", 7, as.numeric(METI_13))),
+         METI_14 = if_else(METI_14 ==  "1\nUnethical", 1,
+                          if_else(METI_14 == "7\nEthical", 7, as.numeric(METI_14))),
+         METI_15 = if_else(METI_15 ==  "1\nIrresponsible", 1,
+                          if_else(METI_15 == "7\nResponsible", 7, as.numeric(METI_15))),
+         METI_16 = if_else(METI_16 ==  "1\nInconsiderate", 1,
+                          if_else(METI_16 == "7\nConsiderate", 7, as.numeric(METI_16)))
+         
+         ) %>% 
+  mutate(Voltaren = if_else(is.na(Voltaren), NA_real_,
+                            if_else(Voltaren == "1Low", 1,
+                                    if_else(Voltaren == "7High", 7, as.numeric(Voltaren)))),
+         
+         Physiotherapy = if_else(is.na(Physiotherapy), NA_real_,
+                            if_else(Physiotherapy == "1Low", 1,
+                                    if_else(Physiotherapy == "7High", 7, as.numeric(Physiotherapy)))),
+         
+         CT = if_else(is.na(CT), NA_real_,
+                            if_else(CT == "1Low", 1,
+                                    if_else(CT == "7High", 7, as.numeric(CT)))),
+         
+         Wait = if_else(is.na(Wait), NA_real_,
+                            if_else(Wait == "1Low", 1,
+                                    if_else(Wait == "7High", 7, as.numeric(Wait)))),
+         ) %>% 
+  mutate(
+    valExpert = if_else(is.na(valExpert), NA_real_,
+                        if_else(valExpert == "1Not at all", 1,
+                            if_else(valExpert == "7Very much", 7, as.numeric(valExpert)))),
+    vlaKnowledge = if_else(is.na(vlaKnowledge), NA_real_,
+                        if_else(vlaKnowledge == "1Not at all", 1,
+                            if_else(vlaKnowledge == "7Very much", 7, as.numeric(vlaKnowledge)))),
+    realHappen = if_else(is.na(realHappen), NA_real_,
+                        if_else(realHappen == "Yes", 1, 0))
+    
+  )
+  
+Data_3 <- Data_2 %>% 
+  mutate(METI = rowMeans(cbind(METI_1, METI_2, METI_3, METI_4, METI_5, METI_6, METI_7, METI_8,
+                               METI_9, METI_10, METI_11, METI_12, METI_13, METI_14, METI_15, METI_16)),
+         METI_Expertise = rowMeans(cbind(METI_1, METI_2, METI_3, METI_4, METI_5, METI_6)),
+         METI_Integrity = rowMeans(cbind(METI_7, METI_8, METI_9, METI_10)),
+         METI_Benelovent = rowMeans(cbind(METI_11, METI_12, METI_13, METI_14, METI_15, METI_16)),
+
+         ) %>% 
+  mutate(val_Expert_Knowledge = sdOutliers(rowMeans(cbind(valExpert, vlaKnowledge))),
+         oneWayCondition = paste0(source_identity
+, source_answer
+))
+
+
+write.csv(Data_3, "Data//dataForAnalysis.csv")
+
+```
