@@ -15,7 +15,6 @@ knitr::opts_chunk$set(echo = TRUE)
 pacman::p_load(tidyverse, doSPSS, here, ez, emmeans)
 
 Data <- read_csv(here("Data//dataForAnalysis.csv"))
-table(Data$Gender) / nrow(Data) * 100
 
 ExpertDK <- c(1, 0, 0, 0)
 ExpertKnow <- c(0, 1, 0, 0)
@@ -95,7 +94,7 @@ modelTow$Figure
 ## Descriptive_Statistics
 ```{r, warning=FALSE,message=FALSE}
 
-modelTow <- twoWay(METI_Integrity$METI_Integrity, METI_Integrity$Expert, METI_Integrity$Ignorance)
+modelTow <- twoWay(METI_Integrity$METI_Integrity, METI_Integrity$source_identity, METI_Integrity$source_answer)
 modelTow$Descriptive_Statistics
 
 
@@ -103,7 +102,7 @@ modelTow$Descriptive_Statistics
 
 ## ANOVA
 ```{r, warning=FALSE,message=FALSE}
-e <- ezANOVA(data = METI_Integrity, dv = METI_Integrity, wid = Q1, between = .(Expert, Ignorance), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
+e <- ezANOVA(data = METI_Integrity, dv = METI_Integrity, wid = Q1, between = .(source_identity, source_answer), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
 e$ANOVA
 ```
 ## Effect size partial Eta square
@@ -138,13 +137,13 @@ modelTow$Figure
 ## Descriptive_Statistics
 ```{r, warning=FALSE,message=FALSE}
 
-modelTow <- twoWay(METI_Benelovent$METI_Benelovent, METI_Benelovent$Expert, METI_Benelovent$Ignorance)
+modelTow <- twoWay(METI_Benelovent$METI_Benelovent, METI_Benelovent$source_identity, METI_Benelovent$source_answer)
 modelTow$Descriptive_Statistics
 ```
 
 ## ANOVA
 ```{r, warning=FALSE,message=FALSE}
-e <- ezANOVA(data = METI_Benelovent, dv = METI_Benelovent, wid = Q1, between = .(Expert, Ignorance), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
+e <- ezANOVA(data = METI_Benelovent, dv = METI_Benelovent, wid = Q1, between = .(source_identity, source_answer), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
 e$ANOVA
 ```
 ## Effect size partial Eta square
@@ -180,22 +179,22 @@ modelTow$Figure
 ```{r, warning=FALSE,message=FALSE}
 
 comp %>% 
-  group_by(Expert) %>% 
+  group_by(source_identity) %>% 
   summarise(M = round(mean(dvCom_4), 2),
             SD = round(sd(dvCom_4), 2))
 
 comp %>% 
-  group_by(Ignorance) %>% 
+  group_by(source_answer) %>% 
   summarise(M = round(mean(dvCom_4), 2),
             SD = round(sd(dvCom_4), 2))
 
-modelTow <- twoWay(comp$dvCom_4, comp$Expert, comp$Ignorance)
+modelTow <- twoWay(comp$dvCom_4, comp$source_identity, comp$source_answer)
 modelTow$Descriptive_Statistics
 ```
 
 ## ANOVA
 ```{r, warning=FALSE,message=FALSE}
-e <- ezANOVA(data = comp, dv = dvCom_4, wid = Q1, between = .(Expert, Ignorance), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
+e <- ezANOVA(data = comp, dv = dvCom_4, wid = Q1, between = .(source_identity, source_answer), type = 3, white.adjust = TRUE, detailed = TRUE, return_aov = TRUE)
 e$ANOVA
 ```
 ## Effect size partial Eta square
